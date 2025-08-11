@@ -4,13 +4,39 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-    <AssemblyName>Yamgooo.SRI.Xml</AssemblyName>
-    <RootNamespace>Yamgooo.SRI.Xml</RootNamespace>
+        <AssemblyName>Yamgooo.SRI.Xml</AssemblyName>
+        <RootNamespace>Yamgooo.SRI.Xml</RootNamespace>
+
+        <!-- NuGet Package Metadata -->
+        <PackageId>Yamgooo.SRI.Xml</PackageId>
+        <Version>1.0.1</Version>
+        <Authors>Erik Portilla</Authors>
+        <Company>Yamgooo</Company>
+        <Description>Biblioteca .NET para generar, parsear y validar XML de factura electrónica SRI (v1.1.0) en Ecuador. Incluye modelos tipados, utilidades de serialización/deserialización y validaciones básicas previas al envío.</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageIcon>icon.png</PackageIcon>
+        <PackageTags>sri ecuador xml invoice factura serialization deserialization validation</PackageTags>
+        <PackageProjectUrl>https://github.com/yamgooo/Sri.Xml</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/yamgooo/Sri.Xml</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <Deterministic>true</Deterministic>
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="/" />
+        <None Include="icon.png" Pack="true" PackagePath="/" />
     </ItemGroup>
 
 </Project>
