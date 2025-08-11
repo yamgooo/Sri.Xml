@@ -1,42 +1,42 @@
-# SRI XML Service
+# Servicio XML SRI
 
 [![.NET](https://img.shields.io/badge/.NET-8.0-blue.svg)](https://dotnet.microsoft.com/download/dotnet/8.0)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![NuGet](https://img.shields.io/badge/nuget-Yamgooo.SRI.Xml-blue.svg)](https://www.nuget.org/packages/Yamgooo.SRI.Xml)
 
-A .NET library to generate and parse Ecuador SRI electronic invoice XML in the official format accepted by SRI (Factura v1.1.0). Use it to produce compliant XML for submission and to map existing SRI XML into strongly typed models.
+Una librería .NET para generar y parsear XML de facturas electrónicas del SRI de Ecuador en el formato oficial aceptado por el SRI (Factura v1.1.0). Úsala para producir XML conforme para el envío y para mapear XML existentes del SRI a modelos fuertemente tipados.
 
-Note: Digital signature (XAdES) is out of scope of this package. For signing, use `Yamgooo.SRI.Sign` alongside this library.
+Nota: La firma digital (XAdES) está fuera del alcance de este paquete. Para firmar, utiliza `Yamgooo.SRI.Sign` junto con esta librería.
 
-Also available in Spanish: [README_es.md](README_es.md)
+También disponible en inglés: [README.md](README.md)
 
-## 🚀 Features
+## 🚀 Características
 
-- **XML Generation**: Robust serialization with `XmlSerializer`, formatted UTF-8 output with indentation and clean namespaces
-- **Deserialization**: Safe conversion from XML to strongly-typed models
-- **Validation**: Pre-generation structural validation with detailed messages
-- **SRI Models**: Complete invoice models for version `1.1.0` (`SriInvoice`, `InfoTributaria`, `InfoFactura`, `Detalles`, etc.)
-- **Async**: Async methods for non-blocking operations
-- **Logging**: Integration with `Microsoft.Extensions.Logging`
-- **Error Handling**: Clear exceptions and helpful traces
+- **Generación de XML**: Serialización robusta con `XmlSerializer`, salida UTF-8 con indentación y espacios de nombres limpios
+- **Deserialización**: Conversión segura de XML a modelos fuertemente tipados
+- **Validación**: Validación estructural previa a la generación con mensajes detallados
+- **Modelos SRI**: Modelos completos de factura para la versión `1.1.0` (`SriInvoice`, `InfoTributaria`, `InfoFactura`, `Detalles`, etc.)
+- **Async**: Métodos asíncronos para operaciones no bloqueantes
+- **Logging**: Integración con `Microsoft.Extensions.Logging`
+- **Manejo de errores**: Excepciones claras y trazas útiles
 
-## 📦 Installation
+## 📦 Instalación
 
-### NuGet Package
+### Paquete NuGet
 ```bash
 dotnet add package Yamgooo.SRI.Xml
 ```
 
-### Manual Installation
+### Instalación manual
 ```bash
 git clone https://github.com/yamgooo/Sri.Xml.git
 cd Sri.Xml
 dotnet build
 ```
 
-## 🛠️ Quick Start
+## 🛠️ Inicio rápido
 
-### 1) Register the service (DI)
+### 1) Registrar el servicio (DI)
 
 ```csharp
 using Microsoft.Extensions.DependencyInjection;
@@ -44,7 +44,7 @@ using Yamgooo.SRI.Xml;
 
 var services = new ServiceCollection();
 
-// Register the service
+// Registrar el servicio
 services.AddLogging();
 services.AddSriXmlService();
 
@@ -52,7 +52,7 @@ var provider = services.BuildServiceProvider();
 var sriXml = provider.GetRequiredService<ISriXmlService>();
 ```
 
-### 2) Generate invoice XML
+### 2) Generar XML de factura
 
 ```csharp
 using Yamgooo.SRI.Xml.Models;
@@ -61,21 +61,21 @@ var invoice = new SriInvoice
 {
     InfoTributaria = new InfoTributaria
     {
-        Ambiente = "2",                // 1=Testing, 2=Production
+        Ambiente = "2",                // 1=Pruebas, 2=Producción
         TipoEmision = "1",             // 1=Normal
-        RazonSocial = "My Company S.A.",
+        RazonSocial = "Mi Empresa S.A.",
         Ruc = "1790012345001",
         ClaveAcceso = "1234567890123456789012345678901234567890123456789",
         Estab = "001",
         PtoEmi = "001",
         Secuencial = "000000123",
-        DirMatriz = "123 Evergreen Ave"
+        DirMatriz = "Calle Falsa 123"
     },
     InfoFactura = new InfoFactura
     {
         FechaEmision = "09/01/2025",
-        TipoIdentificacionComprador = "05", // National ID
-        RazonSocialComprador = "John Doe",
+        TipoIdentificacionComprador = "05", // Cédula
+        RazonSocialComprador = "Juan Pérez",
         IdentificacionComprador = "0912345678",
         TotalSinImpuestos = 100.00m,
         ImporteTotal = 112.00m,
@@ -85,7 +85,7 @@ var invoice = new SriInvoice
             {
                 new TotalImpuesto
                 {
-                    Codigo = "2",            // VAT
+                    Codigo = "2",            // IVA
                     CodigoPorcentaje = "2",  // 12%
                     BaseImponible = 100.00m,
                     Valor = 12.00m
@@ -104,7 +104,7 @@ var invoice = new SriInvoice
             new Detalle
             {
                 CodigoPrincipal = "SKU-001",
-                Descripcion = "Sample product",
+                Descripcion = "Producto de ejemplo",
                 Cantidad = 1,
                 PrecioUnitario = 100.00m,
                 Descuento = 0,
@@ -131,25 +131,25 @@ var invoice = new SriInvoice
 var xml = await sriXml.GenerateInvoiceXmlAsync(invoice);
 ```
 
-### 3) Deserialize invoice XML
+### 3) Deserializar XML de factura
 
 ```csharp
 var invoiceModel = await sriXml.DeserializeInvoiceXmlAsync(xml);
 ```
 
-### 4) Validate structure before generating
+### 4) Validar estructura antes de generar
 
 ```csharp
 var validation = sriXml.ValidateInvoiceStructure(invoice);
 if (!validation.IsValid)
 {
-    Console.WriteLine($"Errors: {validation.ErrorMessage}");
+    Console.WriteLine($"Errores: {validation.ErrorMessage}");
 }
 ```
 
-## 📋 API Reference
+## 📋 Referencia de API
 
-### `ISriXmlService` Interface
+### Interfaz `ISriXmlService`
 
 ```csharp
 Task<string> GenerateInvoiceXmlAsync(SriInvoice invoice);
@@ -157,26 +157,26 @@ Task<SriInvoice> DeserializeInvoiceXmlAsync(string xmlContent);
 ValidationResult ValidateInvoiceStructure(SriInvoice invoice);
 ```
 
-### Main model classes (`Yamgooo.SRI.Xml.Models`)
+### Clases principales (`Yamgooo.SRI.Xml.Models`)
 
-- `SriInvoice` (root `factura` v1.1.0)
+- `SriInvoice` (raíz `factura` v1.1.0)
 - `InfoTributaria`
 - `InfoFactura`
 - `Detalles` / `Detalle`
 - `ImpuestosDetalle` / `ImpuestoDetalle`
 - `TotalConImpuestos` / `TotalImpuesto`
 - `Pagos` / `Pago`
-- `InfoAdicional`, `Retenciones` (optional)
+- `InfoAdicional`, `Retenciones` (opcionales)
 
-## 🔧 Validation rules (summary)
+## 🔧 Reglas de validación (resumen)
 
-- `InfoTributaria`: required `Ambiente`, `TipoEmision`, `RazonSocial`, `Ruc`, `ClaveAcceso`, `Estab`, `PtoEmi`, `Secuencial`, `DirMatriz`.
-- `InfoFactura`: required `FechaEmision`, `TipoIdentificacionComprador`, `RazonSocialComprador`, `IdentificacionComprador`. Values > 0 for `TotalSinImpuestos` and `ImporteTotal`. At least one `Pago`.
-- `Detalles`: at least one `Detalle` with `CodigoPrincipal`, `Descripcion`; `Cantidad`, `PrecioUnitario` and `PrecioTotalSinImpuesto` > 0; at least one tax in `Impuestos`.
+- **`InfoTributaria`**: requeridos `Ambiente`, `TipoEmision`, `RazonSocial`, `Ruc`, `ClaveAcceso`, `Estab`, `PtoEmi`, `Secuencial`, `DirMatriz`.
+- **`InfoFactura`**: requeridos `FechaEmision`, `TipoIdentificacionComprador`, `RazonSocialComprador`, `IdentificacionComprador`. Valores > 0 en `TotalSinImpuestos` e `ImporteTotal`. Al menos un `Pago`.
+- **`Detalles`**: al menos un `Detalle` con `CodigoPrincipal`, `Descripcion`; `Cantidad`, `PrecioUnitario` y `PrecioTotalSinImpuesto` > 0; al menos un impuesto en `Impuestos`.
 
-Errors are exposed via `ValidationResult.Errors` and `ValidationResult.ErrorMessage`.
+Los errores se exponen vía `ValidationResult.Errors` y `ValidationResult.ErrorMessage`.
 
-## 🧪 Testing
+## 🧪 Pruebas
 
 ```csharp
 using Microsoft.Extensions.Logging;
@@ -189,7 +189,7 @@ public async Task GenerateInvoiceXmlAsync_MinValid_ReturnsXml()
     var mockLogger = new Mock<ILogger<SriXmlService>>();
     var service = new SriXmlService(mockLogger.Object);
 
-    var invoice = /* build a valid object like the example */;
+    var invoice = /* construir un objeto válido similar al ejemplo */;
 
     var xml = await service.GenerateInvoiceXmlAsync(invoice);
 
@@ -197,42 +197,42 @@ public async Task GenerateInvoiceXmlAsync_MinValid_ReturnsXml()
 }
 ```
 
-## 🚀 Performance
+## 🚀 Rendimiento
 
-- Async I/O operations
-- Efficient writing with `XmlWriter` and `StringWriter`
-- UTF-8 output with indentation
+- Operaciones de E/S asíncronas
+- Escritura eficiente con `XmlWriter` y `StringWriter`
+- Salida UTF-8 con indentación
 
-## 📦 Dependencies
+## 📦 Dependencias
 
 - **.NET 8.0** (TargetFramework)
 - **Microsoft.Extensions.Logging.Abstractions** (logging)
 
-## 🔒 Considerations
+## 🔒 Consideraciones
 
-- Validate business rules and SRI formats before submission
-- Avoid logging sensitive data (RUC, access keys)
+- Valida reglas de negocio y formatos del SRI antes del envío
+- Evita registrar datos sensibles (RUC, claves de acceso)
 
-## 🤝 Contributing
+## 🤝 Contribución
 
-1. Fork
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit (`git commit -m "feat: amazing feature"`)
-4. Push (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. Haz fork
+2. Crea una rama de feature (`git checkout -b feature/mi-feature-increible`)
+3. Commits (`git commit -m "feat: mi feature increible"`)
+4. Push (`git push origin feature/mi-feature-increible`)
+5. Abre un Pull Request
 
-## 📄 License
+## 📄 Licencia
 
-MIT. See [LICENSE](LICENSE).
+MIT. Ver [LICENSE](LICENSE).
 
-## 📞 Support
+## 📞 Soporte
 
 - Issues: `https://github.com/yamgooo/Sri.Xml/issues`
-- Docs: `https://github.com/yamgooo`
+- Documentación: `https://github.com/yamgooo`
 - Email: erikportillapesantez@outlook.com
 
 ---
 
-Made with ❤️ for the Ecuadorian developer community
+Hecho con ❤️ para la comunidad de desarrolladores ecuatoriana
 
 
