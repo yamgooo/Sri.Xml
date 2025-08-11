@@ -6,6 +6,8 @@
 
 A .NET library to generate and parse Ecuador SRI electronic invoice XML in the official format accepted by SRI (Factura v1.1.0). Use it to produce compliant XML for submission and to map existing SRI XML into strongly typed models.
 
+In addition to XML serialization/deserialization, this package provides first-class C# domain models that map 1:1 to SRI specification artifacts (e.g., `factura`, `infoTributaria`, `infoFactura`, `detalles`, `impuestos`). These models encapsulate SRI-required fields, datatypes, and structural rules so that your application can work in a strongly-typed way against the normative XML schemas while leveraging validation helpers and compliant formatting.
+
 Note: Digital signature (XAdES) is out of scope of this package. For signing, use `Yamgooo.SRI.Sign` alongside this library.
 
 Also available in Spanish: [README_es.md](README_es.md)
@@ -15,7 +17,7 @@ Also available in Spanish: [README_es.md](README_es.md)
 - **XML Generation**: Robust serialization with `XmlSerializer`, formatted UTF-8 output with indentation and clean namespaces
 - **Deserialization**: Safe conversion from XML to strongly-typed models
 - **Validation**: Pre-generation structural validation with detailed messages
-- **SRI Models**: Complete invoice models for version `1.1.0` (`SriInvoice`, `InfoTributaria`, `InfoFactura`, `Detalles`, etc.)
+- **SRI Models**: Complete, strongly-typed C# models mirroring SRI `Factura v1.1.0` (e.g., `SriInvoice`, `InfoTributaria`, `InfoFactura`, `Detalles`, impuestos, pagos). Designed to reflect official XML structure and constraints
 - **Async**: Async methods for non-blocking operations
 - **Logging**: Integration with `Microsoft.Extensions.Logging`
 - **Error Handling**: Clear exceptions and helpful traces
@@ -155,6 +157,7 @@ if (!validation.IsValid)
 Task<string> GenerateInvoiceXmlAsync(SriInvoice invoice);
 Task<SriInvoice> DeserializeInvoiceXmlAsync(string xmlContent);
 ValidationResult ValidateInvoiceStructure(SriInvoice invoice);
+string GenerateAccessKeyFromSriInvoice(SriInvoice invoice);
 ```
 
 ### Main model classes (`Yamgooo.SRI.Xml.Models`)

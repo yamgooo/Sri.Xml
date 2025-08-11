@@ -6,6 +6,8 @@
 
 Una librería .NET para generar y parsear XML de facturas electrónicas del SRI de Ecuador en el formato oficial aceptado por el SRI (Factura v1.1.0). Úsala para producir XML conforme para el envío y para mapear XML existentes del SRI a modelos fuertemente tipados.
 
+Además de la serialización/deserialización de XML, este paquete expone modelos de dominio en C# que mapean de forma 1:1 los artefactos de la especificación del SRI (por ejemplo, `factura`, `infoTributaria`, `infoFactura`, `detalles`, `impuestos`). Estos modelos encapsulan los campos requeridos por el SRI, tipos de datos y reglas estructurales, permitiendo trabajar de forma robusta y tipada contra los esquemas normativos mientras aprovechas utilidades de validación y formateo conforme.
+
 Nota: La firma digital (XAdES) está fuera del alcance de este paquete. Para firmar, utiliza `Yamgooo.SRI.Sign` junto con esta librería.
 
 También disponible en inglés: [README.md](README.md)
@@ -15,7 +17,7 @@ También disponible en inglés: [README.md](README.md)
 - **Generación de XML**: Serialización robusta con `XmlSerializer`, salida UTF-8 con indentación y espacios de nombres limpios
 - **Deserialización**: Conversión segura de XML a modelos fuertemente tipados
 - **Validación**: Validación estructural previa a la generación con mensajes detallados
-- **Modelos SRI**: Modelos completos de factura para la versión `1.1.0` (`SriInvoice`, `InfoTributaria`, `InfoFactura`, `Detalles`, etc.)
+- **Modelos SRI**: Modelos C# completos y fuertemente tipados que reflejan la `Factura v1.1.0` del SRI (p. ej., `SriInvoice`, `InfoTributaria`, `InfoFactura`, `Detalles`, impuestos, pagos). Diseñados para reflejar la estructura y restricciones oficiales del XML
 - **Async**: Métodos asíncronos para operaciones no bloqueantes
 - **Logging**: Integración con `Microsoft.Extensions.Logging`
 - **Manejo de errores**: Excepciones claras y trazas útiles
@@ -155,6 +157,7 @@ if (!validation.IsValid)
 Task<string> GenerateInvoiceXmlAsync(SriInvoice invoice);
 Task<SriInvoice> DeserializeInvoiceXmlAsync(string xmlContent);
 ValidationResult ValidateInvoiceStructure(SriInvoice invoice);
+string GenerateAccessKeyFromSriInvoice(SriInvoice invoice);
 ```
 
 ### Clases principales (`Yamgooo.SRI.Xml.Models`)

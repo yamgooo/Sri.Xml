@@ -29,4 +29,13 @@ public interface ISriXmlService
     /// <returns>Validation result with errors if any</returns>
     ValidationResult ValidateInvoiceStructure(SriInvoice invoice);
     
+    /// <summary>
+    /// Generates the SRI "Clave de Acceso" from a populated <see cref="SriInvoice"/> model.
+    /// Uses the official Mod-11 algorithm and concatenates the fields as per SRI specification
+    /// (fechaEmision ddMMyyyy + codDoc + ruc + ambiente + estab + ptoEmi + secuencial + codigoNumerico(8) + tipoEmision + digitoVerificador).
+    /// </summary>
+    /// <param name="invoice">The invoice source model</param>
+    /// <returns>The 49-digit access key, or empty string if it cannot be generated</returns>
+    string GenerateAccessKeyFromSriInvoice(SriInvoice invoice);
+    
 }

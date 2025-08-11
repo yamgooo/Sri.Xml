@@ -1,4 +1,3 @@
-// -------------------------------------------------------------
 // By: Erik Portilla
 // Date: 2025-08-10
 // -------------------------------------------------------------
@@ -8,6 +7,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.Extensions.Logging;
 using Yamgooo.SRI.Xml.Models;
+using System.Globalization;
 
 namespace Yamgooo.SRI.Xml;
 
@@ -36,6 +36,17 @@ public class SriXmlService(ILogger<SriXmlService> logger) : ISriXmlService
             if (invoice == null)
                 throw new ArgumentNullException(nameof(invoice), "Invoice cannot be null");
 
+            // Auto-generate access key if missing
+            if (string.IsNullOrWhiteSpace(invoice.InfoTributaria?.ClaveAcceso))
+            {
+                var generatedKey = GenerateAccessKeyFromSriInvoice(invoice);
+                if (!string.IsNullOrWhiteSpace(generatedKey))
+                {
+                    invoice.InfoTributaria.ClaveAcceso = generatedKey;
+                    _logger.LogInformation("Access key generated automatically");
+                }
+            }
+
             // Validate invoice structure
             var validationResult = ValidateInvoiceStructure(invoice);
             if (!validationResult.IsValid)
@@ -47,23 +58,18 @@ public class SriXmlService(ILogger<SriXmlService> logger) : ISriXmlService
             // Configure XML writer settings for professional output
             var settings = new XmlWriterSettings
             {
+                Async = true,
                 Encoding = Encoding.UTF8,
                 Indent = true,
                 IndentChars = "    ",
-                OmitXmlDeclaration = false,
-                NewLineChars = "\n",
-                NewLineHandling = NewLineHandling.Replace
+                OmitXmlDeclaration = true 
             };
 
-            using var stringWriter = new StringWriter();
-            using var xmlWriter = XmlWriter.Create(stringWriter, settings);
+            await using var stringWriter = new StringWriter();
+            await using var xmlWriter = XmlWriter.Create(stringWriter, settings);
             
-            // Configure XML namespaces
-            var namespaces = new XmlSerializerNamespaces();
-            namespaces.Add("", "");
-
             // Serialize the invoice
-            _serializer.Serialize(xmlWriter, invoice, namespaces);
+            _serializer.Serialize(xmlWriter, invoice);
             
             var xmlResult = stringWriter.ToString();
             
@@ -153,6 +159,45 @@ public class SriXmlService(ILogger<SriXmlService> logger) : ISriXmlService
     }
     
     #region Private Methods
+
+    /// <summary>
+    /// Calculates SRI Mod-11 check digit according to official specification.
+    /// Returns 0 when result is 11 and 1 when result is 10.
+    /// </summary>
+    private static int CalculateMod11(string input)
+    {
+        const int baseValue = 11;
+        const int minWeight = 2;
+        const int maxWeight = 7;
+
+        int total = 0;
+        int weight = minWeight;
+
+        for (int i = input.Length - 1; i >= 0; i--)
+        {
+            int digit = input[i] - '0';
+            total += digit * weight;
+            weight++;
+            if (weight > maxWeight)
+            {
+                weight = minWeight;
+            }
+        }
+
+        int mod = baseValue - (total % baseValue);
+        if (mod == baseValue) return 0; // 11 -> 0
+        if (mod == baseValue - 1) return 1; // 10 -> 1
+        return mod;
+    }
+
+    /// <summary>
+    /// Generates an 8-digit numeric security code. In production, consider using a deterministic source if needed.
+    /// </summary>
+    private static string GenerateEightDigitSecurityCode()
+    {
+        var random = new Random();
+        return random.Next(10_000_000, 99_999_999).ToString(CultureInfo.InvariantCulture);
+    }
 
     /// <summary>
     /// Validates XML structure
@@ -338,4 +383,64 @@ public class SriXmlService(ILogger<SriXmlService> logger) : ISriXmlService
     }
 
     #endregion
+
+    /// <summary>
+    /// Generates the SRI Access Key (Clave de Acceso) from a populated SriInvoice model.
+    /// Format: ddMMyyyy + codDoc + ruc + ambiente + estab + ptoEmi + secuencial + codigoNumerico(8) + tipoEmision + digitoVerificador
+    /// </summary>
+    public string GenerateAccessKeyFromSriInvoice(SriInvoice sriInvoice)
+    {
+        try
+        {
+            if (sriInvoice?.InfoTributaria == null || sriInvoice.InfoFactura == null)
+            {
+                return string.Empty;
+            }
+
+            var ruc = sriInvoice.InfoTributaria.Ruc;
+            var ambiente = sriInvoice.InfoTributaria.Ambiente;
+            var establecimiento = sriInvoice.InfoTributaria.Estab;
+            var puntoEmision = sriInvoice.InfoTributaria.PtoEmi;
+            var secuencial = sriInvoice.InfoTributaria.Secuencial?.Replace("-", string.Empty);
+            var tipoDocumento = sriInvoice.InfoTributaria.CodDoc;
+            var fechaEmision = sriInvoice.InfoFactura.FechaEmision;
+            var tipoEmision = sriInvoice.InfoTributaria.TipoEmision;
+
+            if (string.IsNullOrWhiteSpace(ruc) || string.IsNullOrWhiteSpace(ambiente) ||
+                string.IsNullOrWhiteSpace(establecimiento) || string.IsNullOrWhiteSpace(puntoEmision) ||
+                string.IsNullOrWhiteSpace(secuencial) || string.IsNullOrWhiteSpace(tipoDocumento) ||
+                string.IsNullOrWhiteSpace(fechaEmision) || string.IsNullOrWhiteSpace(tipoEmision))
+            {
+                return string.Empty;
+            }
+
+            // Date dd/MM/yyyy -> ddMMyyyy
+            var date = DateTime.ParseExact(fechaEmision, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+            var fecha = date.ToString("ddMMyyyy", CultureInfo.InvariantCulture);
+
+            var codigoNumerico = GenerateEightDigitSecurityCode();
+
+            var body = string.Concat(
+                fecha,
+                tipoDocumento,
+                ruc,
+                ambiente,
+                establecimiento,
+                puntoEmision,
+                secuencial,
+                codigoNumerico,
+                tipoEmision
+            );
+
+            var dv = CalculateMod11(body);
+            var claveAcceso = body + dv.ToString(CultureInfo.InvariantCulture);
+
+            return claveAcceso;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating access key from SriInvoice");
+            return string.Empty;
+        }
+    }
 }
