@@ -9,7 +9,7 @@
 
         <!-- NuGet Package Metadata -->
         <PackageId>Yamgooo.SRI.Xml</PackageId>
-        <Version>1.0.1</Version>
+        <Version>1.0.2</Version>
         <Authors>Erik Portilla</Authors>
         <Company>Yamgooo</Company>
         <Description>Biblioteca .NET para generar, parsear y validar XML de factura electrónica SRI (v1.1.0) en Ecuador. Incluye modelos tipados, utilidades de serialización/deserialización y validaciones básicas previas al envío.</Description>
